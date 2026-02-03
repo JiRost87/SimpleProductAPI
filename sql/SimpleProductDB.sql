@@ -31,16 +31,16 @@ CREATE PROCEDURE [dbo].[GetProducts](
 AS
 BEGIN
 	IF (@ProductId IS NULL)
-		SELECT [ProductId],
-			[ProductName],
-			[ImgUri],
+		SELECT [ProductId] AS Id,
+			[ProductName] AS Name,
+			[ImgUri] AS ImageUri,
 			[Price],
 			[Description]
 		FROM [dbo].[Product]
 	ELSE
-		SELECT [ProductId],
-			[ProductName],
-			[ImgUri],
+		SELECT [ProductId] AS Id,
+			[ProductName] AS Name,
+			[ImgUri] AS ImageUri,
 			[Price],
 			[Description]
 		FROM [dbo].[Product]

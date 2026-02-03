@@ -1,4 +1,5 @@
-﻿using SimpleProductAPI.Models;
+﻿using SimpleProductAPI.Data;
+using SimpleProductAPI.Models;
 
 namespace SimpleProductAPI.Services
 {
@@ -7,19 +8,40 @@ namespace SimpleProductAPI.Services
     /// </summary>
     public class ProductService : IProductService
     {
-        public Task<List<Product>> GetProducts()
+        private readonly IDataProvider _dataProvider;
+
+        public ProductService(IDataProvider dataProvider) 
         {
-            throw new NotImplementedException();
+            _dataProvider = dataProvider;
         }
 
-        public Task<Product> GetProductById(int id)
+        public async Task<List<Product>> GetProductsAsync()
         {
-            throw new NotImplementedException();
+            var products = await _dataProvider.GetProductsAsync();
+            return products.ToList();
         }
 
-        public Task<bool> UpdateProductDescription(int id, string description)
+        public async Task<List<Product>> GetProductsAsync(int pageNumber, int pageSize)
         {
-            throw new NotImplementedException();
+            // Basic validation
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 1;
+
+            var products = await _dataProvider.GetProductsAsync();
+            var pagedProducts = products.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+            return pagedProducts;
+        }
+
+        public async Task<Product?> GetProductByIdAsync(int id)
+        {
+            var product = await _dataProvider.GetProductByIdAsync(id);
+            return product;
+        }
+
+        public async Task<bool> UpdateProductDescriptionAsync(int id, string description)
+        {
+            var result = await _dataProvider.UpdateProductDescription(id, description);
+            return result;
         }
     }
 }

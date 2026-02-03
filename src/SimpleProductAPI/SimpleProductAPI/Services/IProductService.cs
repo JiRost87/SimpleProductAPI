@@ -5,8 +5,8 @@ namespace SimpleProductAPI.Services
 {
     public interface IProductService
     {
-        public Task<List<Product>> GetProducts();
-        public Task<Product> GetProductById(int id);
-        public Task<bool> UpdateProductDescription(int id, string description);
+        public Task<List<Product>> GetProductsAsync(int pageNumber = 1, int pageSize = 10);
+        public Task<Product?> GetProductByIdAsync(int id);
+        public Task<bool> UpdateProductDescriptionAsync(int id, string description);
     }
 }

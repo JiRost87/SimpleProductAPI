@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using SimpleProductAPI.Configuration;
 using SimpleProductAPI.Data;
 using SimpleProductAPI.Database;
+using SimpleProductAPI.Services;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,7 @@ builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerConfi
 builder.Services.AddSingleton<IDbConnectionFactory>(_ => 
     new SqlServerConnectionFactory(builder.Configuration["ConnectionString"]!));
 builder.Services.AddScoped<IDataProvider, SqlDataProvider>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 
 builder.Services.AddApiVersioning( opt =>

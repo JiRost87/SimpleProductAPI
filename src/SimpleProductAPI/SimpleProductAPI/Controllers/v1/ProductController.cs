@@ -1,7 +1,7 @@
 ﻿using Asp.Versioning;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SimpleProductAPI.Models;
+using SimpleProductAPI.Services;
 
 namespace SimpleProductAPI.Controllers.v1
 {
@@ -11,23 +11,34 @@ namespace SimpleProductAPI.Controllers.v1
 
     public class ProductController : ControllerBase
     {
-        Product product = new Product { Id = 1, Name = "Test", ImageUri = new Uri("http://test.html"), Price = 10.5M };
+        private readonly IProductService _productService;
+        public ProductController(IProductService productService)
+        {
+            _productService = productService;
+        }
 
         [HttpGet]
-        public async Task<ActionResult<List<Product>>> GetProductsAsync() { 
-            var products = new List<Product>();
-            products.Add(product);
+        public async Task<ActionResult<List<Product>>> GetProductsAsync() 
+        { 
+            var products = await _productService.GetProductsAsync();
             return (Ok(products));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProductAsync(int id) {
+        public async Task<ActionResult<Product>> GetProductAsync(int id) 
+        {
+            var product = await _productService.GetProductByIdAsync(id);
             return (Ok(product));
         }
 
         [HttpPut("{id}/{description}")]
         public async Task<ActionResult> UpdateProductDescriptionAsync(int id, string description)
         {
+            var result = await _productService.UpdateProductDescriptionAsync(id, description);
+            if (!result)
+            {
+               return NotFound();
+            }
             return Ok();
         }
     }

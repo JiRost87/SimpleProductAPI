@@ -5,7 +5,7 @@ using System.Data;
 
 namespace SimpleProductAPI.Data
 {
-    public class SqlDataProvider : IDataProvider
+    public sealed class SqlDataProvider : IDataProvider
     {
 
         private const string _getProductsSpName = "dbo.GetProducts";
@@ -18,35 +18,27 @@ namespace SimpleProductAPI.Data
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<Product?> GetProductByIdAsync(int id) 
+        public async Task<Product?> GetProductByIdAsync(int id)
         {
-            using var dbConnection = await _dbConnectionFactory.CreateConnectionAsync();
-            var product = await dbConnection.QueryFirstOrDefaultAsync<Product>(_getProductsSpName, id, commandType: CommandType.StoredProcedure);
+            using var dbConnection = await _dbConnectionFactory.CreateConnectionAsync().ConfigureAwait(false);
+            var product = await dbConnection.QuerySingleOrDefaultAsync<Product>(_getProductsSpName, new { ProductId = id }, commandType: CommandType.StoredProcedure).ConfigureAwait(false);
             return product;
-        } 
+        }
 
-        public async Task<IEnumerable<Product>> GetProducts()
+        public async Task<IEnumerable<Product>> GetProductsAsync()
         {
-            using var dbConnection = await _dbConnectionFactory.CreateConnectionAsync();
-            var products = await dbConnection.QueryAsync<Product>(_getProductsSpName,commandType: CommandType.StoredProcedure);
+            using var dbConnection = await _dbConnectionFactory.CreateConnectionAsync().ConfigureAwait(false);
+            var products = await dbConnection.QueryAsync<Product>(_getProductsSpName, commandType: CommandType.StoredProcedure).ConfigureAwait(false);
             return products;
         }
 
-        public async Task<bool> UpdateProductDescription(int id, string description) 
+        public async Task<bool> UpdateProductDescription(int id, string description)
         {
-            DynamicParameters dp = new DynamicParameters();
-            dp.Add("id", id);
-            dp.Add("description", description);
+            var parameters = new { ProductId = id, Description = description };
 
-            using var dbConnection = await _dbConnectionFactory.CreateConnectionAsync();
-            var result = await dbConnection.ExecuteAsync(_updateDescriptionSpName, dp, commandType: CommandType.StoredProcedure);
-            if (result != 1)
-            {
-                return false;
-            }
-            return true;
+            using var dbConnection = await _dbConnectionFactory.CreateConnectionAsync().ConfigureAwait(false);
+            var result = await dbConnection.ExecuteAsync(_updateDescriptionSpName, parameters, commandType: CommandType.StoredProcedure).ConfigureAwait(false);
+            return result == 1;
         }
-
-
     }
 }
