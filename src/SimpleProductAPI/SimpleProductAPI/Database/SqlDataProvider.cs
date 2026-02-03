@@ -89,7 +89,7 @@ namespace SimpleProductAPI.Data
                 // Log the number of items retrieved. Use AsList() to get a count efficiently.
                 _logger.LogDebug("GetProductsAsync: retrieved {Count} items", products?.AsList().Count ?? 0);
 
-                return products;
+                return products ?? Enumerable.Empty<Product>();
             }
             catch (Exception ex)
             {

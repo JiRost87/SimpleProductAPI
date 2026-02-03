@@ -33,9 +33,8 @@ builder.Services.AddHttpContextAccessor();
 
 // Resolve connection string from configuration or environment variables.
 var connectionString =
-    builder.Configuration["ConnectionString"]
-    ?? builder.Configuration.GetConnectionString("Default")
-    ?? Environment.GetEnvironmentVariable("CONNECTION_STRING");
+    Environment.GetEnvironmentVariable("CONNECTION_STRING")
+    ?? builder.Configuration["ConnectionString"];
 
 if (string.IsNullOrWhiteSpace(connectionString))
 {
