@@ -36,7 +36,7 @@ namespace SimpleProductAPI.Controllers.v2
         /// <param name="pageNumber"></param>
         /// <param name="pageSize"></param>
         /// <returns>HTTP 200 with a list of <see cref="Product"/> when successful.</returns>
-        [HttpGet]
+        [HttpGet("GetProducts")]
         public async Task<ActionResult<List<Product>>> GetProductsAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             _logger.LogInformation("v2 GetProductsAsync called page={Page} size={Size}", pageNumber, pageSize);
@@ -58,7 +58,7 @@ namespace SimpleProductAPI.Controllers.v2
         /// HTTP 200 (OK) with the <see cref="Product"/> when found 
         /// HTTP 404 (Not Found) for missing products.
         /// </returns>
-        [HttpGet("{id}")]
+        [HttpGet("GetProductById/{id}")]
         public async Task<ActionResult<Product>> GetProductAsync(int id)
         {
             _logger.LogInformation("v2 GetProductAsync called for id={Id}", id);
@@ -82,7 +82,7 @@ namespace SimpleProductAPI.Controllers.v2
         /// HTTP 400 (Bad Request) when <paramref name="dto"/> is null or description is empty;
         /// HTTP 404 (Not Found) when the product does not exist.
         /// </returns>
-        [HttpPut("{id}")]
+        [HttpPut("UpdateProductDescription/{id}")]
         public async Task<ActionResult> UpdateProductDescriptionAsync(int id, [FromBody] UpdateDescriptionDto dto)
         {
             _logger.LogInformation("v2 UpdateProductDescriptionAsync called for id={Id}", id);

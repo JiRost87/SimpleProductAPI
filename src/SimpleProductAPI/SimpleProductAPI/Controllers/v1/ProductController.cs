@@ -36,7 +36,7 @@ namespace SimpleProductAPI.Controllers.v1
         /// <returns>
         /// HTTP 200 (OK) with a list of <see cref="Product"/> when successful.
         /// </returns>
-        [HttpGet]
+        [HttpGet("GetProducts")]
         public async Task<ActionResult<List<Product>>> GetProductsAsync()
         {
             _logger.LogInformation("v1 GetProductsAsync called");
@@ -53,7 +53,7 @@ namespace SimpleProductAPI.Controllers.v1
         /// HTTP 200 (OK) with the <see cref="Product"/> when found 
         /// HTTP 404 (Not Found) for missing products.
         /// </returns>
-        [HttpGet("{id}")]
+        [HttpGet("GetProductById/{id}")]
         public async Task<ActionResult<Product>> GetProductAsync(int id)
         {
             _logger.LogInformation("v1 GetProductAsync called for id={Id}", id);
@@ -77,7 +77,7 @@ namespace SimpleProductAPI.Controllers.v1
         /// HTTP 400 (Bad Request) when <paramref name="dto"/> is null or description is empty;
         /// HTTP 404 (Not Found) when the product does not exist.
         /// </returns>
-        [HttpPut("{id}")]
+        [HttpPut("UpdateProductDescription/{id}")]
         public async Task<ActionResult> UpdateProductDescriptionAsync(int id, [FromBody] UpdateDescriptionDto dto)
         {
             _logger.LogInformation("v1 UpdateProductDescriptionAsync called for id={Id}", id);

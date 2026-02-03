@@ -12,7 +12,10 @@ using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog early using configuration
+// Allow environment variables to override configuration keys.
+builder.Configuration.AddEnvironmentVariables();
+
+// Configure Serilog early using configuration.
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
@@ -24,10 +27,27 @@ builder.Host.UseSerilog();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
+
+
+
+// Resolve connection string from configuration or environment variables.
+var connectionString =
+    builder.Configuration["ConnectionString"]
+    ?? builder.Configuration.GetConnectionString("Default")
+    ?? Environment.GetEnvironmentVariable("CONNECTION_STRING");
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    // Fail fast with clear message if no connection string is provided.
+    throw new InvalidOperationException("Database connection string not found. Set 'ConnectionString', 'ConnectionStrings:Default', or environment variable 'CONNECTION_STRING'.");
+}
 
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerConfigOptions>();
-builder.Services.AddSingleton<IDbConnectionFactory>(_ => 
-    new SqlServerConnectionFactory(builder.Configuration["ConnectionString"]!));
+
+builder.Services.AddSingleton<IDbConnectionFactory>(_ =>
+    new SqlServerConnectionFactory(connectionString));
+
 builder.Services.AddScoped<IDataProvider, SqlDataProvider>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
