@@ -2,6 +2,8 @@ using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using Microsoft.Extensions.Options;
 using SimpleProductAPI.Configuration;
+using SimpleProductAPI.Data;
+using SimpleProductAPI.Database;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,8 +14,12 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
-
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerConfigOptions>();
+builder.Services.AddSingleton<IDbConnectionFactory>(_ => 
+    new SqlServerConnectionFactory(builder.Configuration["ConnectionString"]!));
+builder.Services.AddScoped<IDataProvider, SqlDataProvider>();
+
+
 builder.Services.AddApiVersioning( opt =>
 {
     opt.DefaultApiVersion = new ApiVersion(1, 0);
@@ -43,10 +49,8 @@ if (app.Environment.IsDevelopment())
         foreach(var desc in versionDescProvider.ApiVersionDescriptions)
         {
             opt.SwaggerEndpoint($"/swagger/{desc.GroupName}/swagger.json", $"Product API {desc.GroupName}");
-        }
-        
+        }    
     });
-
 }
 
 app.UseHttpsRedirection();

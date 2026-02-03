@@ -4,7 +4,7 @@ GO
 
 -- Sample user
 CREATE LOGIN ProductDBUser
-	WITH PASSWORD = 'hsRPW@"v641h';
+	WITH PASSWORD = 'hsRPW@mv641h';
 GO
 
 USE [ProductDB]

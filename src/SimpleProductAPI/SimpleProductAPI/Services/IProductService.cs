@@ -6,7 +6,7 @@ namespace SimpleProductAPI.Services
     public interface IProductService
     {
         public Task<List<Product>> GetProducts();
-        public Task<Product> GetProductsById(int id);
+        public Task<Product> GetProductById(int id);
         public Task<bool> UpdateProductDescription(int id, string description);
     }
 }

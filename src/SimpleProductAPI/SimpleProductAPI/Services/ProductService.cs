@@ -12,7 +12,7 @@ namespace SimpleProductAPI.Services
             throw new NotImplementedException();
         }
 
-        public Task<Product> GetProductsById(int id)
+        public Task<Product> GetProductById(int id)
         {
             throw new NotImplementedException();
         }
