@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SimpleProductAPI.Models;
 
 namespace SimpleProductAPI.Controllers.v2
 {
-    [Route("api/[controller]")]
+    [ApiVersion("2")]
+    [Route("v{version:apiVersion}/[controller]")]
     [ApiController]
     public class ProductController : ControllerBase
     {

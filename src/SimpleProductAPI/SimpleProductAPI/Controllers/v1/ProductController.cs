@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SimpleProductAPI.Models;
 
-namespace SimpleProductAPI.Controllers
+namespace SimpleProductAPI.Controllers.v1
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1")]
+    [Route("v{version:apiVersion}/[controller]")]
     [ApiController]
+
     public class ProductController : ControllerBase
     {
         Product product = new Product { Id = 1, Name = "Test", ImageUri = new Uri("http://test.html"), Price = 10.5M };

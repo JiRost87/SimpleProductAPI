@@ -2,6 +2,9 @@
 
 namespace SimpleProductAPI.Services
 {
+    /// <summary>
+    /// The product service
+    /// </summary>
     public class ProductService : IProductService
     {
         public Task<List<Product>> GetProducts()
