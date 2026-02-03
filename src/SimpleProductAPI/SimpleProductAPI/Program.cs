@@ -4,13 +4,23 @@ using Microsoft.Extensions.Options;
 using SimpleProductAPI.Configuration;
 using SimpleProductAPI.Data;
 using SimpleProductAPI.Database;
+using SimpleProductAPI.Middleware;
 using SimpleProductAPI.Services;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Configure Serilog early using configuration
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
 
+builder.Host.UseSerilog();
+
+// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
@@ -20,7 +30,6 @@ builder.Services.AddSingleton<IDbConnectionFactory>(_ =>
     new SqlServerConnectionFactory(builder.Configuration["ConnectionString"]!));
 builder.Services.AddScoped<IDataProvider, SqlDataProvider>();
 builder.Services.AddScoped<IProductService, ProductService>();
-
 
 builder.Services.AddApiVersioning( opt =>
 {
@@ -36,28 +45,72 @@ builder.Services.AddApiVersioning( opt =>
     opt.AssumeDefaultVersionWhenUnspecified = true;
 });
 
-var app = builder.Build();
-
-var versionDescProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.MapOpenApi();
-    app.UseSwagger();
+    Log.Information("Starting web host");
 
-    app.UseSwaggerUI(opt =>
+    var app = builder.Build();
+
+    // Register correlation id middleware first so subsequent logs include CorrelationId
+    app.UseMiddleware<CorrelationIdMiddleware>();
+
+    // Add Serilog request logging so requests/responses are logged with structured properties.
+    // Enrich diagnostic context with CorrelationId and host, and set level based on exception presence/status.
+    app.UseSerilogRequestLogging(opts =>
     {
-        foreach(var desc in versionDescProvider.ApiVersionDescriptions)
+        opts.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms (CorrelationId: {CorrelationId})";
+        opts.GetLevel = (httpContext, elapsed, ex) =>
         {
-            opt.SwaggerEndpoint($"/swagger/{desc.GroupName}/swagger.json", $"Product API {desc.GroupName}");
-        }    
+            if (ex != null) return LogEventLevel.Error;
+            var statusCode = httpContext.Response?.StatusCode;
+            if (statusCode >= 500) return LogEventLevel.Error;
+            if (statusCode >= 400) return LogEventLevel.Warning;
+            return LogEventLevel.Information;
+        };
+        opts.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+        {
+            var correlation = httpContext.Items.ContainsKey(CorrelationIdMiddleware.HeaderName)
+                ? httpContext.Items[CorrelationIdMiddleware.HeaderName]?.ToString()
+                : null;
+            diagnosticContext.Set("CorrelationId", correlation ?? "none");
+            diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+        };
     });
+
+    // Register exception logging middleware so it can produce sanitized responses and still be logged
+    // by SerilogRequestLogging (Serilog will record exception-level if thrown).
+    app.UseMiddleware<ExceptionLoggingMiddleware>();
+
+    var versionDescProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapOpenApi();
+        app.UseSwagger();
+
+        app.UseSwaggerUI(opt =>
+        {
+            foreach(var desc in versionDescProvider.ApiVersionDescriptions)
+            {
+                opt.SwaggerEndpoint($"/swagger/{desc.GroupName}/swagger.json", $"Product API {desc.GroupName}");
+            }    
+        });
+    }
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthorization();
+    app.MapControllers();
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Host terminated unexpectedly");
+    throw;
+}
+finally
+{
+    Log.CloseAndFlush();
+}
