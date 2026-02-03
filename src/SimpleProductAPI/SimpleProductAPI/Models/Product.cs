@@ -1,5 +1,4 @@
-﻿using System.Reflection.Metadata.Ecma335;
-
+﻿
 namespace SimpleProductAPI.Models
 {
     public class Product

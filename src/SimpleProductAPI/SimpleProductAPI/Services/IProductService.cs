@@ -36,7 +36,7 @@ namespace SimpleProductAPI.Services
         /// </summary>
         /// <param name="id">The product identifier to update.</param>
         /// <param name="description">The new description text.</param>
-        /// <returns><c>true</c> when the update succeeded (typically when a single row was affected); otherwise <c>false</c>.</returns>
+        /// <returns><c>true</c> when the update succeeded; otherwise <c>false</c>.</returns>
         public Task<bool> UpdateProductDescriptionAsync(int id, string description);
     }
 }

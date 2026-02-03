@@ -26,7 +26,7 @@ namespace SimpleProductAPI.Data
         /// </summary>
         /// <param name="id">Product identifier to update.</param>
         /// <param name="description">New product description.</param>
-        /// <returns><c>true</c> when the update affected exactly one row; otherwise <c>false</c>.</returns>
+        /// <returns><c>true</c> when the update affected exactly one row otherwise <c>false</c>.</returns>
         Task<bool> UpdateProductDescription(int id, string description);
     }
 }
