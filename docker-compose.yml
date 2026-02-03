@@ -1,0 +1,24 @@
+services:
+  webapi:
+    container_name: simple-product-api
+    build:
+      context: ./src/SimpleProductAPI
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - sqlserver
+    environment:
+      CONNECTION_STRING: "Data Source=sqlserver,1433;Initial catalog=ProductDB;User ID=ProductDBUser;Password=hsRPW@mv641h;TrustServerCertificate=True"
+      ASPNETCORE_ENVIRONMENT: "Development" 
+  sqlserver:
+    container_name: sql-server
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./sql/SimpleProductDB.sql:/mssql-server-setup-scripts.d/SimpleProductDB.sql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: "3aP=,75V(k7o"
