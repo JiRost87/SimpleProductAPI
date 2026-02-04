@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using Polly;
 using Polly.Retry;
 using System.Data;
@@ -25,7 +25,7 @@ namespace SimpleProductAPI.Database
         /// Initializes a new instance of <see cref="SqlServerConnectionFactory"/>.
         /// </summary>
         /// <param name="connectionString">The SQL Server connection string.</param>
-        /// <param name="logger">Optional logger; can be null.</param>
+        /// <param name="logger">Logger</param>
         public SqlServerConnectionFactory(string connectionString, ILogger<SqlServerConnectionFactory> logger)
         {
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
