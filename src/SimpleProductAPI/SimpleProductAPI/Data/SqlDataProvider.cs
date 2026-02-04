@@ -28,8 +28,8 @@ namespace SimpleProductAPI.Data
         /// <param name="logger">Logger instance for this class.</param>
         public SqlDataProvider(IDbConnectionFactory dbConnectionFactory, ILogger<SqlDataProvider> logger)
         {
-            _dbConnectionFactory = dbConnectionFactory;
-            _logger = logger;
+            _dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
