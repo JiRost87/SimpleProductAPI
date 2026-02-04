@@ -11,7 +11,7 @@ namespace SimpleProductAPI.Configuration
 
         public SwaggerConfigOptions(IApiVersionDescriptionProvider apiVersionDescriptionProvider)
         {
-            _apiVersionDescriptionProvider = apiVersionDescriptionProvider;
+            _apiVersionDescriptionProvider = apiVersionDescriptionProvider ?? throw new ArgumentNullException(nameof(apiVersionDescriptionProvider));
         }
 
         public void Configure(SwaggerGenOptions options)

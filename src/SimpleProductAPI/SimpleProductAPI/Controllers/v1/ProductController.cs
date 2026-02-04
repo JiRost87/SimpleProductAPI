@@ -26,8 +26,8 @@ namespace SimpleProductAPI.Controllers.v1
         /// <param name="logger">Injected logger.</param>
         public ProductController(IProductService productService, ILogger<ProductController> logger)
         {
-            _productService = productService;
-            _logger = logger;
+            _productService = productService ?? throw new ArgumentNullException(nameof(productService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>

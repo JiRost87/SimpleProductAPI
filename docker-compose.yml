@@ -9,7 +9,7 @@ services:
     depends_on:
       - sqlserver
     environment:
-      CONNECTION_STRING: "Data Source=sqlserver,1433;Initial catalog=ProductDB;User ID=ProductDBUser;Password=hsRPW@mv641h;TrustServerCertificate=True"
+      CONNECTION_STRING: "Data Source=sqlserver,1433;Initial catalog=ProductDB;User ID=ProductDBUser;Password=hsRPW@mv641h;TrustServerCertificate=True;Connect Timeout=3"
       ASPNETCORE_ENVIRONMENT: "Development" 
   sqlserver:
     container_name: sql-server

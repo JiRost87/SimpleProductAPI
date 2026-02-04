@@ -15,6 +15,7 @@ namespace SimpleProductAPI.Controllers.v2
     [ApiController]
     public class ProductController : ControllerBase
     {
+        private const int MAX_PAGE_SIZE = 100;
         // Service used to access product data and operations.
         private readonly IProductService _productService;
         private readonly ILogger<ProductController> _logger;
@@ -26,8 +27,8 @@ namespace SimpleProductAPI.Controllers.v2
         /// <param name="logger">Injected logger.</param>
         public ProductController(IProductService productService, ILogger<ProductController> logger)
         {
-            _productService = productService;
-            _logger = logger;
+            _productService = productService ?? throw new ArgumentNullException(nameof(productService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -40,11 +41,6 @@ namespace SimpleProductAPI.Controllers.v2
         public async Task<ActionResult<List<Product>>> GetProductsAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             _logger.LogInformation("v2 GetProductsAsync called page={Page} size={Size}", pageNumber, pageSize);
-
-            if (pageNumber < 1) pageNumber = 1;
-            if (pageSize < 1) pageSize = 1;
-            pageSize = Math.Min(pageSize, 500);
-
             var products = await _productService.GetProductsAsync(pageNumber, pageSize);
             _logger.LogInformation("v2 GetProductsAsync returned {Count} products", products?.Count ?? 0);
             return Ok(products);

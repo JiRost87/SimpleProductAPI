@@ -42,10 +42,13 @@ if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Database connection string not found. Set 'ConnectionString', 'ConnectionStrings:Default', or environment variable 'CONNECTION_STRING'.");
 }
 
-builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerConfigOptions>();
+builder.Services.AddSingleton<IConfigureOptions<SwaggerGenOptions>, SwaggerConfigOptions>();
 
-builder.Services.AddSingleton<IDbConnectionFactory>(_ =>
-    new SqlServerConnectionFactory(connectionString));
+builder.Services.AddSingleton<IDbConnectionFactory>(sp =>
+    new SqlServerConnectionFactory(
+        connectionString,
+        sp.GetRequiredService<ILogger<SqlServerConnectionFactory>>()
+    ));
 
 builder.Services.AddScoped<IDataProvider, SqlDataProvider>();
 builder.Services.AddScoped<IProductService, ProductService>();

@@ -10,6 +10,8 @@ namespace SimpleProductAPI.Services
     /// </summary>
     public class ProductService : IProductService
     {
+        private const int MAX_PAGE_SIZE = 100;
+
         // Underlying data provider used to fetch and update product data.
         private readonly IDataProvider _dataProvider;
 
@@ -23,8 +25,8 @@ namespace SimpleProductAPI.Services
         /// <param name="logger">Logger instance for this service.</param>
         public ProductService(IDataProvider dataProvider, ILogger<ProductService> logger) 
         {
-            _dataProvider = dataProvider;
-            _logger = logger;
+            _dataProvider = dataProvider ?? throw new ArgumentNullException(nameof(dataProvider));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -56,9 +58,14 @@ namespace SimpleProductAPI.Services
         {
             _logger.LogDebug("GetProductsAsync(paging): page={Page}, size={Size}", pageNumber, pageSize);
 
-            // Basic validation: ensure page and size are at least 1.
+            // Basic validation for paging parameters.
             if (pageNumber < 1) pageNumber = 1;
             if (pageSize < 1) pageSize = 1;
+            if (pageSize > MAX_PAGE_SIZE)
+            {
+                _logger.LogWarning("GetProductsAsync(paging): pageSize {Size} exceeds max, capping to {MaxSize}", pageSize, MAX_PAGE_SIZE);
+                pageSize = MAX_PAGE_SIZE;
+            }
 
             // Fetch all products then apply in-memory paging.
             var products = await _dataProvider.GetProductsAsync();
