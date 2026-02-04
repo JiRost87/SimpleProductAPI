@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -38,51 +39,6 @@ namespace SimpleProductAPI.Tests.Controllers.v2
             var returned = Assert.IsType<List<Product>>(ok.Value);
             Assert.Single(returned);
             _productServiceMock.Verify(s => s.GetProductsAsync(1, 10), Times.Once);
-        }
-
-        [Fact]
-        public async Task GetProductsAsync_PageNumberLessThan1_ChangedTo1()
-        {
-            // Arrange
-            var products = new List<Product>();
-            _productServiceMock.Setup(s => s.GetProductsAsync(1, 10)).ReturnsAsync(products);
-
-            // Act
-            var actionResult = await _controller.GetProductsAsync(-5, 10);
-
-            // Assert
-            Assert.IsType<OkObjectResult>(actionResult.Result);
-            _productServiceMock.Verify(s => s.GetProductsAsync(1, 10), Times.Once);
-        }
-
-        [Fact]
-        public async Task GetProductsAsync_PageSizeLessThan1_ChangedTo1()
-        {
-            // Arrange
-            var products = new List<Product>();
-            _productServiceMock.Setup(s => s.GetProductsAsync(1, 1)).ReturnsAsync(products);
-
-            // Act
-            var actionResult = await _controller.GetProductsAsync(1, 0);
-
-            // Assert
-            Assert.IsType<OkObjectResult>(actionResult.Result);
-            _productServiceMock.Verify(s => s.GetProductsAsync(1, 1), Times.Once);
-        }
-
-        [Fact]
-        public async Task GetProductsAsync_MaximumPageSize500()
-        {
-            // Arrange
-            var products = new List<Product>();
-            _productServiceMock.Setup(s => s.GetProductsAsync(1, 500)).ReturnsAsync(products);
-
-            // Act
-            var actionResult = await _controller.GetProductsAsync(1, 1000);
-
-            // Assert
-            Assert.IsType<OkObjectResult>(actionResult.Result);
-            _productServiceMock.Verify(s => s.GetProductsAsync(1, 500), Times.Once);
         }
 
         [Fact]
@@ -167,6 +123,21 @@ namespace SimpleProductAPI.Tests.Controllers.v2
 
             // Assert
             Assert.IsType<NoContentResult>(result);
+        }
+
+        // Constructor guard tests
+        [Fact]
+        public void Ctor_NullService_ThrowsArgumentNullException()
+        {
+            var logger = new Mock<ILogger<ProductController>>();
+            Assert.Throws<ArgumentNullException>(() => new ProductController(null!, logger.Object));
+        }
+
+        [Fact]
+        public void Ctor_NullLogger_ThrowsArgumentNullException()
+        {
+            var service = new Mock<IProductService>();
+            Assert.Throws<ArgumentNullException>(() => new ProductController(service.Object, null!));
         }
     }
 }

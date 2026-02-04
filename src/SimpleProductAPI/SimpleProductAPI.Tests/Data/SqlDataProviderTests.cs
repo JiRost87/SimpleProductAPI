@@ -79,5 +79,20 @@ namespace SimpleProductAPI.Tests.Data
             await Assert.ThrowsAsync<Exception>(() => provider.GetProductByIdAsync(2));
             await Assert.ThrowsAsync<Exception>(() => provider.UpdateProductDescription(2, "x"));
         }
+
+        // Constructor guard tests
+        [Fact]
+        public void Ctor_NullConnectionFactory_ThrowsArgumentNullException()
+        {
+            var logger = new Mock<ILogger<SqlDataProvider>>();
+            Assert.Throws<ArgumentNullException>(() => new SqlDataProvider(null!, logger.Object));
+        }
+
+        [Fact]
+        public void Ctor_NullLogger_ThrowsArgumentNullException()
+        {
+            var factory = new Mock<IDbConnectionFactory>();
+            Assert.Throws<ArgumentNullException>(() => new SqlDataProvider(factory.Object, null!));
+        }
     }
 }

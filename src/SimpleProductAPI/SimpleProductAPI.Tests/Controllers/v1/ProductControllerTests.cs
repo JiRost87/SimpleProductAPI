@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -125,6 +126,21 @@ namespace SimpleProductAPI.Tests.Controllers.v1
 
             // Assert
             Assert.IsType<NoContentResult>(result);
+        }
+
+        // Constructor guard tests
+        [Fact]
+        public void Ctor_NullService_ThrowsArgumentNullException()
+        {
+            var logger = new Mock<ILogger<ProductController>>();
+            Assert.Throws<ArgumentNullException>(() => new ProductController(null!, logger.Object));
+        }
+
+        [Fact]
+        public void Ctor_NullLogger_ThrowsArgumentNullException()
+        {
+            var service = new Mock<IProductService>();
+            Assert.Throws<ArgumentNullException>(() => new ProductController(service.Object, null!));
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -80,6 +81,44 @@ namespace SimpleProductAPI.Tests.Services
         }
 
         [Fact]
+        public async Task GetProductsAsync_PageSizeExceedsMax_CapsToMaxPageSize()
+        {
+            // Arrange: create 150 items, request pageSize > MAX_PAGE_SIZE (100)
+            var items = Enumerable.Range(1, 150).Select(i =>
+                new Product { Id = i, Name = $"P{i}", ImageUri = $"u{i}", Price = i }).ToList();
+            _dataProviderMock.Setup(d => d.GetProductsAsync()).ReturnsAsync(items);
+
+            // Act: request first page with excessive size
+            var page = await _service.GetProductsAsync(1, 200);
+
+            // Assert: should be capped (MAX_PAGE_SIZE = 100)
+            Assert.Equal(100, page.Count);
+            Assert.Equal(1, page.First().Id);
+            Assert.Equal(100, page.Last().Id);
+            _dataProviderMock.Verify(d => d.GetProductsAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetProductsAsync_ProductsMayHaveNullDescription_ReturnsNullDescription()
+        {
+            // Arrange
+            var items = new List<Product>
+            {
+                new Product { Id = 1, Name = "A", ImageUri = "i", Price = 1m, Description = null }
+            };
+            _dataProviderMock.Setup(d => d.GetProductsAsync()).ReturnsAsync(items);
+
+            // Act
+            var result = await _service.GetProductsAsync();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result);
+            Assert.Null(result[0].Description);
+            _dataProviderMock.Verify(d => d.GetProductsAsync(), Times.Once);
+        }
+
+        [Fact]
         public async Task GetProductByIdAsync_ProductExists_ReturnsProduct()
         {
             // Arrange
@@ -123,6 +162,21 @@ namespace SimpleProductAPI.Tests.Services
             // Assert
             Assert.Equal(expected, result);
             _dataProviderMock.Verify(d => d.UpdateProductDescription(id, desc), Times.Once);
+        }
+
+        // Constructor guard tests
+        [Fact]
+        public void Ctor_NullDataProvider_ThrowsArgumentNullException()
+        {
+            var logger = new Mock<ILogger<ProductService>>();
+            Assert.Throws<ArgumentNullException>(() => new ProductService(null!, logger.Object));
+        }
+
+        [Fact]
+        public void Ctor_NullLogger_ThrowsArgumentNullException()
+        {
+            var provider = new Mock<IDataProvider>();
+            Assert.Throws<ArgumentNullException>(() => new ProductService(provider.Object, null!));
         }
     }
 }
